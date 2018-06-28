@@ -45,7 +45,7 @@ def on_message(client, userdata, message):
 		# Check sensor
 		if msg['msg'] == 'CHECK_STATUS':
 			print 'status: {0}'.format(Status)
-			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'status': Status}))
+			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
 
 		# Start sensing
 		# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
@@ -65,7 +65,7 @@ def on_message(client, userdata, message):
 		# Check sensor
 		if msg['msg'] == 'CHECK_STATUS':
 			print 'status: {0}'.format(Status)
-			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'status': Status}))
+			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
 
 		# # # Send rawdata (regular)
 		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
@@ -126,7 +126,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 						'az_min':az_min,
 						'az_max':az_max,
 						}}
-	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps({'status': Status}))
+	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
 
 	# Update Status
 	Status = STATUS_LIST[0]
