@@ -100,16 +100,16 @@ def on_message(client, userdata, message):
 		print "on_message: error"
 
 # Helper functions
-def do_sensing(event_time=None,time_step=1,num_sample=30):
+def do_sensing(event_time=None,time_step=1,num_sample=10):
 	global Status
 	# DAQ
 	if event_time==None: event_time = datetime.datetime.now()
 	dt_list,ax_list,ay_list,az_list = start_daq(time_step,num_sample)
 	# Store raw data
-	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time)
+	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
 	f= open(filename,"w+")
-	for i in range(len(dt_list))
-	f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
+        for i in range(len(dt_list)):
+        	f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
 	f.close()
 	Status = STATUS_LIST[0]
 
@@ -123,7 +123,7 @@ if not os.path.exists(DIR_PRC):
 
 
 # Set up connection
-client = mqttClient.Client(USER)            	   #create new instance
+client = mqttClient.Client(SENSOR_ID)            	   #create new instance
 client.username_pw_set(USER, password=PASSWORD)    #set username and password
 client.on_connect= on_connect                      #attach function to callback
 client.on_message= on_message                      #attach function to callback
@@ -133,7 +133,7 @@ client.on_message= on_message                      #attach function to callback
 client.connect(BROKER_ADDR, port=BROKER_PORT)
 client.loop_start()       	 #start the loop
 while Connected != True:   	 #Wait for connection
-	time.sleep(0.1)
+	time.sleep(1)
 
 
 # Subscribes the designated channel
