@@ -67,18 +67,12 @@ def on_message(client, userdata, message):
 				t.daemon = True
 				t.start()
 
-
-			# # # Send rawdata (regular)
-			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
-			# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_regular, message JSON{id, data})
-			# # elif mesage.payload == 'SEN_RAWDATA_REGULAR':
-			# # 	Status = STATUS_LIST[2]
-			# # 	print 'status: {0}'.format(Status)
-			# # 	# Do uploading
-			# # 	# Done
-			# # 	Status = STATUS_LIST[0]
-			# # 	print 'status: {0}'.format(Status)
-
+			elif msg['msg'] == 'UPLOAD_RAWDATA_ABNORMAL':
+				Status = STATUS_LIST[2]
+				# event_time = msg['event_time']
+				t = threading.Thread(target=do_uploading_abnormal)
+				t.daemon = True
+				t.start()
 
 		elif Status == STATUS_LIST[1]:
 			# Check sensor
@@ -93,17 +87,6 @@ def on_message(client, userdata, message):
 				print 'status: {0}'.format(Status)
 				payload = {'sensor_id': SENSOR_ID, 'status': Status}
 				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
-
-			# # # Send rawdata (abnormal)
-			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
-			# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
-			# # elif mesage.payload == 'SEND_RAWDATA_ABNORMAL':
-			# # 	Status = STATUS_LIST[2]
-			# # 	print 'status: {0}'.format(Status)
-			# # 	# Do uploading
-			# # 	# Done
-			# # 	Status = STATUS_LIST[0]
-			# # 	print 'status: {0}'.format(Status)
 
 			# # # Param update
 			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
@@ -155,40 +138,69 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 	Status = STATUS_LIST[0]
 
 
+def prepare_rawdata(event_time=None):
+	# Choose file and read data
+	if event_time != None:
+		event_time = event_time.isoformat()
+		filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time)
+		if os.path.isfile(filename):
+			f = open(filename, "r")
+			data = f.readlines()
+			f.close()
+		else:
+			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
+			return payload
+	else:
+		filelist = glob.glob(DIR_RAW+'/*')
+		filename = max(filelist, key=os.path.getctime)
+		if os.path.isfile(filename):
+			event_time = os.path.basename(filename)[8:-4]
+			f = open(filename, "r")
+			data = f.readlines()
+			f.close()
+		else:
+			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
+			return payload
+
+	# Generate payload
+	dt_list = []
+	ax_list = []
+	ay_list = []
+	az_list = []
+	for d in data:
+		dt, ax, ay, az = d.split('\t')
+		dt_list.append(dt)
+		ax_list.append(float(ax))
+		ay_list.append(float(ay))
+		az_list.append(float(az))
+	payload = {'sensor_id': SENSOR_ID,
+				'event_time': event_time,
+				'success': 'Success',
+				'data': {'dt_list':dt_list,
+						'ax_list':ax_list,
+						'ay_list':ay_list,
+						'az_list':az_list,
+						}}
+	return payload
+
 
 def do_uploading_regular(event_time=None):
 	global Status
-
-	# Choose file and read data
-	if event_time != None:
-		filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
-		if os.path.isfile(filename):
-			f = open(filename, "r")
-			data = f.readlines()
-			f.close()
-		else:
-			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
-			client.publish('machine/sensor/{0}/out/raw_data_regular'.format(SENSOR_ID), json.dumps(payload))
-
-	else:
-		filelist = glob.glob(DIR_RAW)
-		filename = max(filelist, key=os.path.getctime)
-		if os.path.isfile(filename):
-			f = open(filename, "r")
-			data = f.readlines()
-			f.close()
-		else:
-			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
-			client.publish('machine/sensor/{0}/out/raw_data_regular'.format(SENSOR_ID), json.dumps(payload))
-	print data
+	# Prepare payload
+	payload = prepare_rawdata(event_time)
+	# Upload payload
+	client.publish('machine/sensor/{0}/out/raw_data_regular'.format(SENSOR_ID), json.dumps(payload))
+	# Update status
+	Status = STATUS_LIST[0]
 
 
-
-
-
-
-
-
+def do_uploading_abnormal(event_time=None):
+	global Status
+	# Prepare payload
+	payload = prepare_rawdata(event_time)
+	# Upload payload
+	client.publish('machine/sensor/{0}/out/raw_data_abnormal'.format(SENSOR_ID), json.dumps(payload))
+	# Update status
 	Status = STATUS_LIST[0]
 
 
