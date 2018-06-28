@@ -7,6 +7,8 @@ import json
 from i2c_handler import start_daq
 import datetime
 import os
+import os.path
+import glob
 
 # Metadata, which may need to be stored in a separate file
 SENSOR_ID = 'ACC_001'
@@ -18,7 +20,7 @@ SUB_TOPIC = 'machine/sensor/in'
 DIR_RAW = './data_raw'
 DIR_PRC = './data_prc'
 
-STATUS_LIST = ['IDLE', 'SENSING']
+STATUS_LIST = ['IDLE', 'SENSING', 'UPLOADING']
 
 # Global variables
 Connected = False
@@ -39,19 +41,16 @@ def on_message(client, userdata, message):
 
 	try:
 		msg = json.loads(message.payload)
-		print "Message received: {0}".format(msg)
 		
 		if Status == STATUS_LIST[0]:
 			# Check sensor
 			if msg['msg'] == 'CHECK_STATUS':
 				print 'status: {0}'.format(Status)
-				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
+				payload = {'sensor_id': SENSOR_ID, 'status': Status}
+				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
 
-			# Start sensing
-			# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
-			#             -> do sensing consequences (sensing, store, preproc, store)
-			#             -> publish preprocdata (topic: machine/sensor/sensorID/out/preprocessed_data, message JSON{id, data})
-			elif msg['msg'] == 'START_SENSING':
+			# Do sensing
+			elif msg['msg'] == 'DO_SENSING':
 				Status = STATUS_LIST[1]
 				# event_time = msg['event_time']
 				# time_step = msg['time_step']
@@ -60,12 +59,14 @@ def on_message(client, userdata, message):
 				t.daemon = True
 				t.start()
 
+			# Upload raw data (regular)
+			elif msg['msg'] == 'UPLOAD_RAWDATA_REGULAR':
+				Status = STATUS_LIST[2]
+				# event_time = msg['event_time']
+				t = threading.Thread(target=do_uploading)
+				t.daemon = True
+				t.start()
 
-		elif Status == STATUS_LIST[1]:
-			# Check sensor
-			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
-				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
 
 			# # # Send rawdata (regular)
 			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
@@ -77,6 +78,21 @@ def on_message(client, userdata, message):
 			# # 	# Done
 			# # 	Status = STATUS_LIST[0]
 			# # 	print 'status: {0}'.format(Status)
+
+
+		elif Status == STATUS_LIST[1]:
+			# Check sensor
+			if msg['msg'] == 'CHECK_STATUS':
+				print 'status: {0}'.format(Status)
+				payload = {'sensor_id': SENSOR_ID, 'status': Status}
+				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
+
+		elif Status == STATUS_LIST[2]:
+			# Check sensor
+			if msg['msg'] == 'CHECK_STATUS':
+				print 'status: {0}'.format(Status)
+				payload = {'sensor_id': SENSOR_ID, 'status': Status}
+				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
 
 			# # # Send rawdata (abnormal)
 			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
@@ -96,6 +112,8 @@ def on_message(client, userdata, message):
 		print "on_message: error"
 
 
+
+
 # Helper functions
 def do_sensing(event_time=None,time_step=1,num_sample=10):
 	global Status
@@ -108,7 +126,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
 	f= open(filename,"w+")
 	for i in range(len(dt_list)):
-		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
+		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i].isoformat(),ax_list[i],ay_list[i],az_list[i]))
 	f.close()
 	
 	# Preprocessing
@@ -127,10 +145,51 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 						'az_max':az_max,
 						}}
 	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+	filename = "{0}/{1}_{2}.dat".format(DIR_PRC,SENSOR_ID,event_time.isoformat())
+	f= open(filename,"w+")
+	for i in range(len(dt_list)):
+		f.write(json.dumps(payload))
+	f.close()
 
 	# Update Status
 	Status = STATUS_LIST[0]
 
+
+
+def do_uploading(event_time=None):
+	global Status
+
+	# Choose file and read data
+	if event_time != None:
+		filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
+		if os.path.isfile(fname):
+			f = open(filename, "r")
+			data = f.readlines()
+			f.close()
+		else:
+			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
+			client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+
+	else:
+		filelist = glob.glob(DIR_RAW)
+		filename = max(list_of_files, key=os.path.getctime)
+		if os.path.isfile(fname):
+			f = open(filename, "r")
+			data = f.readlines()
+			f.close()
+		else:
+			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
+			client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+	print data
+
+
+
+
+
+
+
+
+	Status = STATUS_LIST[0]
 
 
 
