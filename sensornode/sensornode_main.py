@@ -162,7 +162,7 @@ def do_uploading_regular(event_time=None):
 	# Choose file and read data
 	if event_time != None:
 		filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
-		if os.path.isfile(fname):
+		if os.path.isfile(filename):
 			f = open(filename, "r")
 			data = f.readlines()
 			f.close()
@@ -173,7 +173,7 @@ def do_uploading_regular(event_time=None):
 	else:
 		filelist = glob.glob(DIR_RAW)
 		filename = max(filelist, key=os.path.getctime)
-		if os.path.isfile(fname):
+		if os.path.isfile(filename):
 			f = open(filename, "r")
 			data = f.readlines()
 			f.close()
