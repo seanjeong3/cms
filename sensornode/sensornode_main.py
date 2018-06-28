@@ -63,7 +63,7 @@ def on_message(client, userdata, message):
 			elif msg['msg'] == 'UPLOAD_RAWDATA_REGULAR':
 				Status = STATUS_LIST[2]
 				# event_time = msg['event_time']
-				t = threading.Thread(target=do_uploading)
+				t = threading.Thread(target=do_uploading_regular)
 				t.daemon = True
 				t.start()
 
@@ -156,7 +156,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 
 
 
-def do_uploading(event_time=None):
+def do_uploading_regular(event_time=None):
 	global Status
 
 	# Choose file and read data
@@ -168,18 +168,18 @@ def do_uploading(event_time=None):
 			f.close()
 		else:
 			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
-			client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+			client.publish('machine/sensor/{0}/out/raw_data_regular'.format(SENSOR_ID), json.dumps(payload))
 
 	else:
 		filelist = glob.glob(DIR_RAW)
-		filename = max(list_of_files, key=os.path.getctime)
+		filename = max(filelist, key=os.path.getctime)
 		if os.path.isfile(fname):
 			f = open(filename, "r")
 			data = f.readlines()
 			f.close()
 		else:
 			payload = {'sensor_id': SENSOR_ID, 'success': 'Fail'}
-			client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+			client.publish('machine/sensor/{0}/out/raw_data_regular'.format(SENSOR_ID), json.dumps(payload))
 	print data
 
 
