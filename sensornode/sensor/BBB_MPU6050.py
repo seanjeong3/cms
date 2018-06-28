@@ -14,7 +14,7 @@ GYR_Z = 0x47
 ACC_SF = 16384.0
 GYR_SF = 131.0
 CAL_NUM = 100
-TS = 1
+TS = 2
 
 
 if __name__ == '__main__':
