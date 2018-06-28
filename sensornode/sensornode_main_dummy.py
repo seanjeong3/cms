@@ -4,12 +4,11 @@ import paho.mqtt.client as mqttClient
 import threading
 import time
 import json
-from i2c_handler import start_daq
 import datetime
 import os
 
 # Metadata, which may need to be stored in a separate file
-SENSOR_ID = 'ACC_001'
+SENSOR_ID = 'Dummy'
 BROKER_ADDR = 'eil-computenode1.stanford.edu'
 BROKER_PORT = 8080
 USER = 'swjeong3'
@@ -102,15 +101,15 @@ def on_message(client, userdata, message):
 # Helper functions
 def do_sensing(event_time=None,time_step=1,num_sample=30):
 	global Status
-	# DAQ
-	if event_time==None: event_time = datetime.datetime.now()
-	dt_list,ax_list,ay_list,az_list = start_daq(time_step,num_sample)
-	# Store raw data
-	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time)
-	f= open(filename,"w+")
-	for i in range(len(dt_list)):
-		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
-	f.close()
+	# # DAQ
+	# if event_time==None: event_time = datetime.datetime.now()
+	# dt_list,ax_list,ay_list,az_list = start_daq(time_step,num_sample)
+	# # Store raw data
+	# filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time)
+	# f= open(filename,"w+")
+	# for i in range(len(dt_list)):
+	# 	f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
+	# f.close()
 	Status = STATUS_LIST[0]
 
 
@@ -123,7 +122,7 @@ if not os.path.exists(DIR_PRC):
 
 
 # Set up connection
-client = mqttClient.Client(USER)            	   #create new instance
+client = mqttClient.Client(SENSOR_ID)            	   #create new instance
 client.username_pw_set(USER, password=PASSWORD)    #set username and password
 client.on_connect= on_connect                      #attach function to callback
 client.on_message= on_message                      #attach function to callback
@@ -133,7 +132,7 @@ client.on_message= on_message                      #attach function to callback
 client.connect(BROKER_ADDR, port=BROKER_PORT)
 client.loop_start()       	 #start the loop
 while Connected != True:   	 #Wait for connection
-	time.sleep(0.1)
+	time.sleep(1)
 
 
 # Subscribes the designated channel
