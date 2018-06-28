@@ -37,63 +37,63 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, message):
 	global Status
 
-	# try:
-	msg = json.loads(message.payload)
-	print "Message received: {0}".format(msg)
-	
-	if Status == STATUS_LIST[0]:
-		# Check sensor
-		if msg['msg'] == 'CHECK_STATUS':
-			print 'status: {0}'.format(Status)
-			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
+	try:
+		msg = json.loads(message.payload)
+		print "Message received: {0}".format(msg)
+		
+		if Status == STATUS_LIST[0]:
+			# Check sensor
+			if msg['msg'] == 'CHECK_STATUS':
+				print 'status: {0}'.format(Status)
+				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
 
-		# Start sensing
-		# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
-		#             -> do sensing consequences (sensing, store, preproc, store)
-		#             -> publish preprocdata (topic: machine/sensor/sensorID/out/preprocessed_data, message JSON{id, data})
-		elif msg['msg'] == 'START_SENSING':
-			Status = STATUS_LIST[1]
-			# event_time = msg['event_time']
-			# time_step = msg['time_step']
-			# num_sample = msg['num_sample']
-			t = threading.Thread(target=do_sensing)
-			t.daemon = True
-			t.start()
+			# Start sensing
+			# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
+			#             -> do sensing consequences (sensing, store, preproc, store)
+			#             -> publish preprocdata (topic: machine/sensor/sensorID/out/preprocessed_data, message JSON{id, data})
+			elif msg['msg'] == 'START_SENSING':
+				Status = STATUS_LIST[1]
+				# event_time = msg['event_time']
+				# time_step = msg['time_step']
+				# num_sample = msg['num_sample']
+				t = threading.Thread(target=do_sensing)
+				t.daemon = True
+				t.start()
 
 
-	elif Status == STATUS_LIST[1]:
-		# Check sensor
-		if msg['msg'] == 'CHECK_STATUS':
-			print 'status: {0}'.format(Status)
-			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
+		elif Status == STATUS_LIST[1]:
+			# Check sensor
+			if msg['msg'] == 'CHECK_STATUS':
+				print 'status: {0}'.format(Status)
+				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'sensor_id': SENSOR_ID, 'status': Status}))
 
-		# # # Send rawdata (regular)
-		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
-		# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_regular, message JSON{id, data})
-		# # elif mesage.payload == 'SEN_RAWDATA_REGULAR':
-		# # 	Status = STATUS_LIST[2]
-		# # 	print 'status: {0}'.format(Status)
-		# # 	# Do uploading
-		# # 	# Done
-		# # 	Status = STATUS_LIST[0]
-		# # 	print 'status: {0}'.format(Status)
+			# # # Send rawdata (regular)
+			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
+			# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_regular, message JSON{id, data})
+			# # elif mesage.payload == 'SEN_RAWDATA_REGULAR':
+			# # 	Status = STATUS_LIST[2]
+			# # 	print 'status: {0}'.format(Status)
+			# # 	# Do uploading
+			# # 	# Done
+			# # 	Status = STATUS_LIST[0]
+			# # 	print 'status: {0}'.format(Status)
 
-		# # # Send rawdata (abnormal)
-		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
-		# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
-		# # elif mesage.payload == 'SEND_RAWDATA_ABNORMAL':
-		# # 	Status = STATUS_LIST[2]
-		# # 	print 'status: {0}'.format(Status)
-		# # 	# Do uploading
-		# # 	# Done
-		# # 	Status = STATUS_LIST[0]
-		# # 	print 'status: {0}'.format(Status)
+			# # # Send rawdata (abnormal)
+			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
+			# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
+			# # elif mesage.payload == 'SEND_RAWDATA_ABNORMAL':
+			# # 	Status = STATUS_LIST[2]
+			# # 	print 'status: {0}'.format(Status)
+			# # 	# Do uploading
+			# # 	# Done
+			# # 	Status = STATUS_LIST[0]
+			# # 	print 'status: {0}'.format(Status)
 
-		# # # Param update
-		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
-		# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
-	# except:
-	# 	print "on_message: error"
+			# # # Param update
+			# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
+			# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
+	except:
+		print "on_message: error"
 
 
 # Helper functions
@@ -118,7 +118,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 
 	# Uploading
 	payload = {'sensor_id': SENSOR_ID,
-				'event_time': event_time,
+				'event_time': event_time.isoformat(),
 				'data': {'ax_min':ax_min,
 						'ax_max':ax_max,
 						'ay_min':ay_min,
