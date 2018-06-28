@@ -37,39 +37,35 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, message):
 	global Status
 
-	try:
-		msg = json.loads(message.payload)
-		print "Message received: {0}".format(msg)
-		
-		if Status == STATUS_LIST[0]:
-			# Check sensor
-			# on message: (topic: machine/sensor/#/in, message: CHECK_STATUS) 
-			#             -> publish sensor ID (topic: machine/sensor/sensorID/out/status, message: <sensorID>)
-			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
-				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), Status)
+	# try:
+	msg = json.loads(message.payload)
+	print "Message received: {0}".format(msg)
+	
+	if Status == STATUS_LIST[0]:
+		# Check sensor
+		if msg['msg'] == 'CHECK_STATUS':
+			print 'status: {0}'.format(Status)
+			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'status': Status}))
 
-			# Start sensing
-			# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
-			#             -> do sensing consequences (sensing, store, preproc, store)
-			#             -> publish preprocdata (topic: machine/sensor/sensorID/out/preprocessed_data, message JSON{id, data})
-			elif msg['msg'] == 'START_SENSING':
-				Status = STATUS_LIST[1]
-				# event_time = msg['event_time']
-				# time_step = msg['time_step']
-				# num_sample = msg['num_sample']
-				t = threading.Thread(target=do_sensing)
-				t.daemon = True
-				t.start()
+		# Start sensing
+		# on message: (topic: machine/sensor/#/in, message: START_SENSING) 
+		#             -> do sensing consequences (sensing, store, preproc, store)
+		#             -> publish preprocdata (topic: machine/sensor/sensorID/out/preprocessed_data, message JSON{id, data})
+		elif msg['msg'] == 'START_SENSING':
+			Status = STATUS_LIST[1]
+			# event_time = msg['event_time']
+			# time_step = msg['time_step']
+			# num_sample = msg['num_sample']
+			t = threading.Thread(target=do_sensing)
+			t.daemon = True
+			t.start()
 
 
-		elif Status == STATUS_LIST[1]:
-			# Check sensor
-			# on message: (topic: machine/sensor/#/in, message: CHECK_STATUS) 
-			#             -> publish sensor ID (topic: machine/sensor/sensorID/out/status, message: <sensorID>)
-			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
-				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), Status)
+	elif Status == STATUS_LIST[1]:
+		# Check sensor
+		if msg['msg'] == 'CHECK_STATUS':
+			print 'status: {0}'.format(Status)
+			client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps({'status': Status}))
 
 		# # # Send rawdata (regular)
 		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_REGULAR)
@@ -96,27 +92,45 @@ def on_message(client, userdata, message):
 		# # # Param update
 		# # # on message: (topic: machine/sensor/#/in, message: SEND_RAWDATA_ABNORMAL)
 		# # #             -> publish rawcdata (topic: machine/sensor/sensorID/out/raw_data_abnormal, message JSON{id, data})
-	except:
-		print "on_message: error"
+	# except:
+	# 	print "on_message: error"
+
 
 # Helper functions
 def do_sensing(event_time=None,time_step=1,num_sample=10):
 	global Status
+
 	# DAQ
 	if event_time==None: event_time = datetime.datetime.now()
 	dt_list,ax_list,ay_list,az_list = start_daq(time_step,num_sample)
+
 	# Store raw data
 	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
 	f= open(filename,"w+")
-<<<<<<< HEAD
-        for i in range(len(dt_list)):
-        	f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
-=======
 	for i in range(len(dt_list)):
 		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i],ax_list[i],ay_list[i],az_list[i]))
->>>>>>> c54002673f82a089e0233be3b53dfca73327ac63
 	f.close()
+	
+	# Preprocessing
+	ax_min,ax_max = [min(ax_list),max(ax_list)]
+	ay_min,ay_max = [min(ay_list),max(ay_list)]
+	az_min,az_max = [min(az_list),max(az_list)]
+
+	# Uploading
+	payload = {'sensor_id': SENSOR_ID,
+				'event_time': event_time,
+				'data': {'ax_min':ax_min,
+						'ax_max':ax_max,
+						'ay_min':ay_min,
+						'ay_max':ay_max,
+						'az_min':az_min,
+						'az_max':az_max,
+						}}
+	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps({'status': Status}))
+
+	# Update Status
 	Status = STATUS_LIST[0]
+
 
 
 
