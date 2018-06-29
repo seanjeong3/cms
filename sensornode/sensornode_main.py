@@ -57,7 +57,7 @@ def on_message(client, userdata, message):
 					time_step = msg['time_step']
 				if 'num_sample' in msg.keys():
 					num_sample = msg['num_sample']
-				t = threading.Thread(target=do_sensing)
+				t = threading.Thread(target=do_sensing, args(time_step, time_step, num_sample))
 				t.daemon = True
 				t.start()
 
@@ -102,11 +102,12 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 	global Status
 
 	# DAQ
-	if event_time==None: event_time = datetime.datetime.now()
+	if event_time==None: 
+		event_time = datetime.datetime.now().isoformat()
 	dt_list,ax_list,ay_list,az_list = start_daq(time_step,num_sample)
 
 	# Store raw data
-	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time.isoformat())
+	filename = "{0}/{1}_{2}.dat".format(DIR_RAW,SENSOR_ID,event_time)
 	f= open(filename,"w+")
 	for i in range(len(dt_list)):
 		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i].isoformat(),ax_list[i],ay_list[i],az_list[i]))
@@ -119,7 +120,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 
 	# Uploading
 	payload = {'sensor_id': SENSOR_ID,
-				'event_time': event_time.isoformat(),
+				'event_time': event_time,
 				'data': {'ax_min':ax_min,
 						'ax_max':ax_max,
 						'ay_min':ay_min,
@@ -128,7 +129,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 						'az_max':az_max,
 						}}
 	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
-	filename = "{0}/{1}_{2}.dat".format(DIR_PRC,SENSOR_ID,event_time.isoformat())
+	filename = "{0}/{1}_{2}.dat".format(DIR_PRC,SENSOR_ID,event_time)
 	f= open(filename,"w+")
 	for i in range(len(dt_list)):
 		f.write(json.dumps(payload))
