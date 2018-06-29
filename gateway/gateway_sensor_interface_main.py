@@ -133,14 +133,14 @@ while Connected != True:   	 #Wait for connection
 client.subscribe(SUB_TOPIC)
 
 
+# Iniitialize status dictionary
+Sensors_status = {}
+for sensor in Sensors:
+	Sensors_status[sensor] = SENSOR_STATUS_LIST[0]
+
 try:
 	while True:
 		if Status == STATUS_LIST[0]:
-			# Iniitialize status dictionary
-			Sensors_status = {}
-			for sensor in Sensors:
-				Sensors_status[sensor] = SENSOR_STATUS_LIST[0]
-
 			# Send check status message to sensors
 			payload = {'msg': 'CHECK_STATUS'}
 			client.publish('machine/sensor/in', json.dumps(payload))
