@@ -24,11 +24,15 @@ DIR_RAW_ABN = './dir3_anomaly_raw_data'
 STATUS_LIST = ['IDLE', 'CHECKING_STATUS', 'UPLOADING']
 SENSOR_STATUS_LIST = ['UNKNOWN', 'IDLE', 'SENSING', 'UPLOADING']
 
+SAMPLING_TS = 1
+SAMPLING_NUM = 5
+
 # Global variables
 Connected = False
 Status = STATUS_LIST[0]
 Sensors = ['ACC_001', 'ACC_002', 'ACC_003', 'ACC_004']
 Sensors_status = {}
+Sensors_data = {}
 Latest_sensing_time = datetime.datetime.now()
 
 # Callback functions
@@ -59,6 +63,23 @@ def on_message(client, userdata, message):
 		if sensor_id in Sensors:
 			Sensors_status[sensor_id] = status
 
+	elif Status == STATUS_LIST[2]:
+		if topic_last == 'status':
+			sensor_id = msg['sensor_id']
+			status = msg['status']
+			if sensor_id in Sensors:
+				Sensors_status[sensor_id] = status
+
+		elif topic_last == 'preprocessed_data':
+			sensor_id = msg['sensor_id']
+			event_time = msg['event_time']
+			data = msg['data']
+			if sensor_id in Sensors:
+				Sensors_status[sensor_id] = SENSOR_STATUS_LIST[1]
+				Sensors_processed_data[sensor_id] = data
+
+
+		
 
 
 	# 	# Check sensor status
@@ -180,17 +201,34 @@ try:
 			for key in Sensors:
 				if Sensors_status[key] != SENSOR_STATUS_LIST[1]:
 					all_checked = False
+
+			# Start sensing
 			if all_checked:
 				Latest_sensing_time = datetime.datetime.now()
+				Sensors_processed_data = {}
 				payload = {'msg': 'DO_SENSING',
 							'event_time': Latest_sensing_time.isoformat(),
-							'time_step': 1,
-							'num_sample': 5}
+							'time_step': SAMPLING_TS,
+							'num_sample': SAMPLING_NUM}
 				client.publish('machine/sensor/in', json.dumps(payload))
+				for sensor in Sensors:
+					Sensors_status[sensor] = SENSOR_STATUS_LIST[2]
 				Status = STATUS_LIST[2]
 
 		elif Status == STATUS_LIST[2]:
-			print 'wait'
+			all_finished = True
+			# Check sensors' response
+			for key in Sensors:
+				if Sensors_status[key] != SENSOR_STATUS_LIST[1]:
+					all_finished = False
+			
+			# Once data are acquired, store it to the designated folder
+			if all_finished:
+				for i in range(len(dt_list)):
+					f.write(json.dumps(payload))
+
+				Status = STATUS_LIST[0]
+
 			
 				
 

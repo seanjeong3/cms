@@ -131,8 +131,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
 	filename = "{0}/{1}_{2}.dat".format(DIR_PRC,SENSOR_ID,event_time)
 	f= open(filename,"w+")
-	for i in range(len(dt_list)):
-		f.write(json.dumps(payload))
+	f.write(json.dumps(payload))
 	f.close()
 
 	# Update Status
