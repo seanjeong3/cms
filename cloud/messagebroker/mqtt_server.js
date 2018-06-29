@@ -47,7 +47,7 @@ function store_preprocessed_data(data) {
   for (var i=0; i<body.length; i++){
     var ts = new Date(Date.parse(body[i].event_time));
     console.log(body[i].event_time)
-    var params = [body[i].sensor_id, (dateFormat(ts, "yyyy")), ts, body[i].data];
+    var params = [body[i].sensor_id, (dateFormat(ts, "yyyy")), ts, body[i].data.min, body[i].data.max];
     queries.push({'query':query, 'params':params});
   }
   cassClient.batch(queries, { prepare: true }, function (err) {
