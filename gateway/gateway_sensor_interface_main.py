@@ -143,30 +143,29 @@ try:
 			# Send check status message to sensors
 			payload = {'msg': 'CHECK_STATUS'}
 			client.publish('machine/sensor/in', json.dumps(payload))
-			Status = STATUS_LIST[1]
-
-
-		elif Status == STATUS_LIST[1]:
 			all_checked = True
 			# Check sensors' response
 			for key in Sensors:
 				if Sensors_status[key] != SENSOR_STATUS_LIST[1]:
 					all_checked = False
+			if all_checked:	
+				Status = STATUS_LIST[1]
 
+
+		elif Status == STATUS_LIST[1]:
 			# Start sensing
-			if all_checked:
-				Latest_sensing_time = datetime.datetime.now()
-				Sensors_processed_data = {}
-				payload = {'msg': 'DO_SENSING',
-							'event_time': Latest_sensing_time.isoformat(),
-							'time_step': SAMPLING_TS,
-							'num_sample': SAMPLING_NUM}
-				client.publish('machine/sensor/in', json.dumps(payload))
-				for sensor in Sensors:
-					Sensors_status[sensor] = SENSOR_STATUS_LIST[2]
-				DAQ_COUNT += 1
-				print "Start DAQ ({0}): {1}".format(DAQ_COUNT,Latest_sensing_time.isoformat())
-				Status = STATUS_LIST[2]
+			Latest_sensing_time = datetime.datetime.now()
+			Sensors_processed_data = {}
+			payload = {'msg': 'DO_SENSING',
+						'event_time': Latest_sensing_time.isoformat(),
+						'time_step': SAMPLING_TS,
+						'num_sample': SAMPLING_NUM}
+			client.publish('machine/sensor/in', json.dumps(payload))
+			for sensor in Sensors:
+				Sensors_status[sensor] = SENSOR_STATUS_LIST[2]
+			DAQ_COUNT += 1
+			print "Start DAQ ({0}): {1}".format(DAQ_COUNT,Latest_sensing_time.isoformat())
+			Status = STATUS_LIST[2]
 
 
 		elif Status == STATUS_LIST[2]:
