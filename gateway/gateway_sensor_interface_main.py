@@ -183,7 +183,7 @@ try:
 			if all_checked:
 				Latest_sensing_time = datetime.datetime.now()
 				payload = {'msg': 'DO_SENSING',
-							'event_time': Latest_sensing_time,
+							'event_time': Latest_sensing_time.isoformat(),
 							'time_step': 1,
 							'num_sample': 5}
 				client.publish('machine/sensor/in', json.dumps(payload))

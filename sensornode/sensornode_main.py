@@ -57,7 +57,7 @@ def on_message(client, userdata, message):
 					time_step = msg['time_step']
 				if 'num_sample' in msg.keys():
 					num_sample = msg['num_sample']
-				t = threading.Thread(target=do_sensing, args(time_step, time_step, num_sample))
+				t = threading.Thread(target=do_sensing, args=(time_step, time_step, num_sample))
 				t.daemon = True
 				t.start()
 
