@@ -25,7 +25,7 @@ STATUS_LIST = ['INIT', 'IDLE', 'WAIT_SENSING', 'ANALYSIS', 'WAIT_RAW_DATA_ABNORM
 SENSOR_STATUS_LIST = ['UNKNOWN', 'IDLE', 'SENSING', 'UPLOADING']
 
 SAMPLING_TS = 0.05
-SAMPLING_NUM = 200
+SAMPLING_NUM = 1200
 REGULAR_UPLOAD_FREQ = 10
 
 # Global variables
@@ -254,6 +254,9 @@ try:
 					f= open(filename,"w+")
 					f.write(json.dumps(Sensors_raw_data_regular[sensor]))
 					f.close()
+				# Initialize
+				for sensor in Sensors:
+					Sensors_status[sensor] = SENSOR_STATUS_LIST[0]
 				Status = STATUS_LIST[0]
 
 				
