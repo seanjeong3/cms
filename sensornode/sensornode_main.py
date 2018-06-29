@@ -64,14 +64,16 @@ def on_message(client, userdata, message):
 			# Upload raw data (regular)
 			elif msg['msg'] == 'UPLOAD_RAWDATA_REGULAR':
 				Status = STATUS_LIST[2]
-				# event_time = msg['event_time']
+				if 'event_time' in msg.keys(): 
+					event_time = msg['event_time']
 				t = threading.Thread(target=do_uploading_regular)
 				t.daemon = True
 				t.start()
 
 			elif msg['msg'] == 'UPLOAD_RAWDATA_ABNORMAL':
 				Status = STATUS_LIST[2]
-				# event_time = msg['event_time']
+				if 'event_time' in msg.keys(): 
+					event_time = msg['event_time']
 				t = threading.Thread(target=do_uploading_abnormal)
 				t.daemon = True
 				t.start()
