@@ -9,7 +9,7 @@ const cassClient = new cassandra.Client({ contactPoints: cassIP, keyspace: cassK
 
 
 var settings = {
-  port: 1883
+  port: 8080
 };
  
 //here we start mosca
