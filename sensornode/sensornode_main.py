@@ -45,16 +45,18 @@ def on_message(client, userdata, message):
 		if Status == STATUS_LIST[0]:
 			# Check sensor
 			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
 				payload = {'sensor_id': SENSOR_ID, 'status': Status}
 				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
 
 			# Do sensing
 			elif msg['msg'] == 'DO_SENSING':
 				Status = STATUS_LIST[1]
-				# event_time = msg['event_time']
-				# time_step = msg['time_step']
-				# num_sample = msg['num_sample']
+				if 'event_time' in msg.keys(): 
+					event_time = msg['event_time']
+				if 'time_step' in msg.keys(): 
+					time_step = msg['time_step']
+				if 'num_sample' in msg.keys():
+					num_sample = msg['num_sample']
 				t = threading.Thread(target=do_sensing)
 				t.daemon = True
 				t.start()
@@ -77,14 +79,12 @@ def on_message(client, userdata, message):
 		elif Status == STATUS_LIST[1]:
 			# Check sensor
 			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
 				payload = {'sensor_id': SENSOR_ID, 'status': Status}
 				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
 
 		elif Status == STATUS_LIST[2]:
 			# Check sensor
 			if msg['msg'] == 'CHECK_STATUS':
-				print 'status: {0}'.format(Status)
 				payload = {'sensor_id': SENSOR_ID, 'status': Status}
 				client.publish('machine/sensor/{0}/out/status'.format(SENSOR_ID), json.dumps(payload))
 
