@@ -56,6 +56,7 @@ function store_preprocessed_data(data) {
        }
     return;
   });
+}
 
 
 function store_raw_data_abnormal(data) {
@@ -75,7 +76,7 @@ function store_raw_data_abnormal(data) {
        }
     return;
   });
-
+}
 
 function store_raw_data_regular(data) {
   console.log(data);
@@ -94,7 +95,7 @@ function store_raw_data_regular(data) {
        }
     return;
   });
-
+}
  
 // fired when a client subscribes to a topic
 server.on('subscribed', function(topic, client) {
