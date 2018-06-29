@@ -11,8 +11,8 @@ import glob
 
 # Metadata, which may need to be stored in a separate file
 GATEWAY_ID = 'GTW_001'
-BROKER_ADDR = 'eil-computenode1.stanford.edu'
-BROKER_PORT = 8080
+BROKER_ADDR = 'localhost'
+BROKER_PORT = 1883
 USER = 'swjeong3'
 PASSWORD = 'nopassword'
 SUB_TOPIC = 'machine/sensor/+/out/#'
