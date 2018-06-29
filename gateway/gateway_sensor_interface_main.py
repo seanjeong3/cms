@@ -60,13 +60,14 @@ def on_message(client, userdata, message):
 	topic_last = topic.split('/')[-1]
 	
 	if Status == STATUS_LIST[0]:
-		pass
-
-	elif Status == STATUS_LIST[1]:
 		sensor_id = msg['sensor_id']
 		status = msg['status']
 		if sensor_id in Sensors:
 			Sensors_status[sensor_id] = status
+
+	elif Status == STATUS_LIST[1]:
+		pass
+		
 
 	elif Status == STATUS_LIST[2]:
 		if topic_last == 'preprocessed_data':
