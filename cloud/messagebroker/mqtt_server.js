@@ -1,5 +1,7 @@
 var mosca = require('mosca')
 var cassandra = require('cassandra-driver');
+var bodyParser = require('body-parser');
+var dateFormat = require('dateformat');
 
 var cassIP = ['0.0.0.0:9042'];
 var cassKeyspace = 'cms_system';
@@ -29,8 +31,8 @@ server.on('clientConnected', function(client) {
 // fired when a message is received
 server.on('published', function(packet, client) {
   //console.log('Published : ', packet.payload);
-  if (packet.topic == 'machine/gateway/out/preprocessed_data') {
-        store_preprocessed_data(packet.payload.toString());
+  if (packet.topic == 'machine/gateway/out/processed_data') {
+        store_processed_data(packet.payload.toString());
   } else if (packet.topic == 'machine/gateway/out/raw_data_abnormal') {
         store_raw_data_abnormal(packet.payload.toString());
   } else if (packet.topic == 'machine/gateway/out/raw_data_regular') {
@@ -39,10 +41,10 @@ server.on('published', function(packet, client) {
 
 });
 
-function store_preprocessed_data(data) {
+function store_processed_data(data) {
   console.log(data);
   var body = JSON.parse(data);
-  const query = 'INSERT INTO sensor_data_preprocessed (sensor_id, year, event_time, min, max) values (?, ?, ?, ?, ?)';
+  const query = 'INSERT INTO sensor_data_processed (sensor_id, year, event_time, min, max) values (?, ?, ?, ?, ?)';
   var queries = []
   for (var i=0; i<body.length; i++){
     var ts = new Date(Date.parse(body[i].event_time));
