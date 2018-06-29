@@ -119,6 +119,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 	az_min,az_max = [min(az_list),max(az_list)]
 
 	# Uploading
+	print event_time
 	payload = {'sensor_id': SENSOR_ID,
 				'event_time': event_time,
 				'data': {'ax_min':ax_min,

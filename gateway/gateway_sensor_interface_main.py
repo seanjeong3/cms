@@ -190,7 +190,7 @@ try:
 				Status = STATUS_LIST[2]
 
 		elif Status == STATUS_LIST[2]:
-			print wait
+			print 'wait'
 			
 				
 
