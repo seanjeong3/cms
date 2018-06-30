@@ -31,7 +31,7 @@ REGULAR_UPLOAD_FREQ = 10
 # Global variables
 Connected = False
 Status = STATUS_LIST[0]
-Sensors = ['ACC_001', 'ACC_002', 'ACC_003', 'ACC_004']
+Sensors = ['ACC001', 'ACC002', 'ACC003', 'ACC004']
 Sensors_status = {}
 Sensors_processed_data = {}
 Sensors_raw_data_abnormal = {}
@@ -70,7 +70,7 @@ def on_message(client, userdata, message):
 		
 
 	elif Status == STATUS_LIST[2]:
-		if topic_last == 'preprocessed_data':
+		if topic_last == 'processed_data':
 			sensor_id = msg['sensor_id']
 			event_time = msg['event_time']
 			data = msg['data']
@@ -180,8 +180,19 @@ try:
 			if all_finished:
 				# store it to the designated folder				
 				for sensor in Sensors:
-					filename = "{0}/{1}_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
+					filename = "{0}/{1}X_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
+					data = {'max': Sensors_processed_data[sensor]['ax_max'], 'min': Sensors_processed_data[sensor]['ax_min']}
+					f.write(json.dumps(Sensors_processed_data[sensor]))
+					f.close()
+					filename = "{0}/{1}Y_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					data = {'max': Sensors_processed_data[sensor]['ay_max'], 'min': Sensors_processed_data[sensor]['ay_min']}
+					f.write(json.dumps(Sensors_processed_data[sensor]))
+					f.close()
+					filename = "{0}/{1}Z_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					data = {'max': Sensors_processed_data[sensor]['az_max'], 'min': Sensors_processed_data[sensor]['az_min']}
 					f.write(json.dumps(Sensors_processed_data[sensor]))
 					f.close()
 				Status = STATUS_LIST[3]
@@ -209,6 +220,7 @@ try:
 				Status = STATUS_LIST[4]
 			else:
 				Status = STATUS_LIST[5]
+				
 
 		elif Status == STATUS_LIST[4]:
 			all_finished = True
@@ -220,9 +232,17 @@ try:
 			if all_finished:
 				# store it to the designated folder				
 				for sensor in Sensors:
-					filename = "{0}/{1}_{2}.dat".format(DIR_RAW_ABN,sensor,Latest_sensing_time)
+					filename = "{0}/{1}X_{2}.dat".format(DIR_RAW_ABN,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
-					f.write(json.dumps(Sensors_raw_data_abnormal[sensor]))
+					f.write(json.dumps(Sensors_raw_data_abnormal[sensor]['ax_list']))
+					f.close()
+					filename = "{0}/{1}Y_{2}.dat".format(DIR_RAW_ABN,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					f.write(json.dumps(Sensors_raw_data_abnormal[sensor]['ay_list']))
+					f.close()
+					filename = "{0}/{1}Z_{2}.dat".format(DIR_RAW_ABN,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					f.write(json.dumps(Sensors_raw_data_abnormal[sensor]['az_list']))
 					f.close()
 				Status = STATUS_LIST[5]
 
@@ -250,19 +270,23 @@ try:
 			if all_finished:
 				# store it to the designated folder				
 				for sensor in Sensors:
-					filename = "{0}/{1}_{2}.dat".format(DIR_RAW_REG,sensor,Latest_sensing_time)
+					filename = "{0}/{1}X_{2}.csv".format(DIR_RAW_REG,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
-					f.write(json.dumps(Sensors_raw_data_regular[sensor]))
+					f.write(json.dumps(Sensors_raw_data_regular[sensor]['ax_list']))
+					f.close()
+					filename = "{0}/{1}Y_{2}.csv".format(DIR_RAW_REG,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					f.write(json.dumps(Sensors_raw_data_regular[sensor]['ay_list']))
+					f.close()
+					filename = "{0}/{1}Z_{2}.csv".format(DIR_RAW_REG,sensor,Latest_sensing_time)
+					f= open(filename,"w+")
+					f.write(json.dumps(Sensors_raw_data_regular[sensor]['az_list']))
 					f.close()
 				# Initialize
 				for sensor in Sensors:
 					Sensors_status[sensor] = SENSOR_STATUS_LIST[0]
 				Status = STATUS_LIST[0]
 
-				
-
-
-		
 		# Parse and store data
 		# Do some analysis
 

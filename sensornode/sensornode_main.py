@@ -11,7 +11,7 @@ import os.path
 import glob
 
 # Metadata, which may need to be stored in a separate file
-SENSOR_ID = 'ACC_001'
+SENSOR_ID = 'ACC001'
 BROKER_ADDR = '10.34.186.81'
 BROKER_PORT = 1883
 USER = 'swjeong3'
@@ -115,7 +115,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 		f.write("{0}\t{1}\t{2}\t{3}\n".format(dt_list[i].isoformat(),ax_list[i],ay_list[i],az_list[i]))
 	f.close()
 	
-	# Preprocessing
+	# Processing
 	ax_min,ax_max = [min(ax_list),max(ax_list)]
 	ay_min,ay_max = [min(ay_list),max(ay_list)]
 	az_min,az_max = [min(az_list),max(az_list)]
@@ -130,7 +130,7 @@ def do_sensing(event_time=None,time_step=1,num_sample=10):
 						'az_min':az_min,
 						'az_max':az_max,
 						}}
-	client.publish('machine/sensor/{0}/out/preprocessed_data'.format(SENSOR_ID), json.dumps(payload))
+	client.publish('machine/sensor/{0}/out/processed_data'.format(SENSOR_ID), json.dumps(payload))
 	filename = "{0}/{1}_{2}.dat".format(DIR_PRC,SENSOR_ID,event_time)
 	f= open(filename,"w+")
 	f.write(json.dumps(payload))

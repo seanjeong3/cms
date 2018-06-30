@@ -11,5 +11,5 @@ CREATE TABLE IF NOT EXISTS cms_system.sensor_data_raw_regular
 CREATE TABLE IF NOT EXISTS cms_system.sensor_data_raw_abnormal
 (sensor_id text, year text, event_time timestamp, data list<double>, PRIMARY KEY((sensor_id, year), event_time));
 
-CREATE TABLE IF NOT EXISTS cms_system.sensor_data_preprocessed
+CREATE TABLE IF NOT EXISTS cms_system.sensor_data_processed
 (sensor_id text, year text, event_time timestamp, min double, max double, PRIMARY KEY((sensor_id, year), event_time));
