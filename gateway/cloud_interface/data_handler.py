@@ -126,7 +126,7 @@ class Processed_data_handler(Data_handler):
 			data = json.load(open(f))
 			bname = os.path.basename(f)
 			sensor_id = bname.split('_')[0]
-			timestamp = datetime.datetime.strptime(bname.split('_')[1][:-4], '%Y-%m-%d %H.%M.%S.%f')
+			timestamp = datetime.datetime.strptime(bname.split('_')[1][:-4], '%Y-%m-%d %H:%M:%S.%f')
 			timestamp = datetime.datetime.strftime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
 			json_data = {
 				"sensor_id": sensor_id,
@@ -166,7 +166,7 @@ class Raw_data_handler(Data_handler):
 
 			bname = os.path.basename(f)
 			sensor_id = bname.split('_')[0]
-			timestamp = datetime.datetime.strptime(bname.split('_')[1][:-4], '%Y-%m-%d %H.%M.%S.%f')
+			timestamp = datetime.datetime.strptime(bname.split('_')[1][:-4], '%Y-%m-%d %H:%M:%S.%f')
 			timestamp = datetime.datetime.strftime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
 			json_data = {
 				"sensor_id": sensor_id,
