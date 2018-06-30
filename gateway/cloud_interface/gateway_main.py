@@ -13,6 +13,20 @@ REPO2 = 'repo2_regular_raw_data'
 DIR3 = 'dir3_anomaly_raw_data'
 REPO3 = 'repo3_anomaly_raw_data'
 
+# Set up data repository folder
+if not os.path.exists(DIR1):
+    os.makedirs(DIR1)
+if not os.path.exists(DIR2):
+    os.makedirs(DIR2)    
+if not os.path.exists(DIR3):
+    os.makedirs(DIR3) 
+if not os.path.exists(REPO1):
+    os.makedirs(REPO1)       
+if not os.path.exists(REPO2):
+    os.makedirs(REPO2)           
+if not os.path.exists(REPO3):
+    os.makedirs(REPO3)           
+
 HOSTNAME = 'eil-computenode1.stanford.edu'
 # URI_PROCESSED_DATA = '/sensor_data_processed'
 # URI_REGULAR_DATA = '/sensor_data_raw_regular'
