@@ -5,6 +5,7 @@
 from data_handler import Processed_data_handler, Raw_data_handler
 from event_handler import Watcher, Handler
 from mqtt_handler import MQTT_Handler
+import os
 
 DIR1 = 'dir1_processed_data'
 REPO1 = 'repo1_processed_data'
