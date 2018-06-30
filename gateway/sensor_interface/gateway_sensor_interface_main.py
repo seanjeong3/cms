@@ -10,8 +10,8 @@ import os.path
 import glob
 
 # Metadata, which may need to be stored in a separate file
-GATEWAY_ID = 'GTW_001'
-BROKER_ADDR = 'localhost'
+GATEWAY_ID = 'GTW001'
+BROKER_ADDR = '10.34.186.81'
 BROKER_PORT = 1883
 USER = 'swjeong3'
 PASSWORD = 'nopassword'
@@ -24,9 +24,9 @@ DIR_RAW_ABN = './dir3_anomaly_raw_data'
 STATUS_LIST = ['INIT', 'IDLE', 'WAIT_SENSING', 'ANALYSIS', 'WAIT_RAW_DATA_ABNORMAL', 'CHECK_REGULAR_UPLOAD', 'WAIT_RAW_DATA_REGULAR']
 SENSOR_STATUS_LIST = ['UNKNOWN', 'IDLE', 'SENSING', 'UPLOADING']
 
-SAMPLING_TS = 0.05
-SAMPLING_NUM = 1200
-REGULAR_UPLOAD_FREQ = 10
+SAMPLING_TS = 0.1
+SAMPLING_NUM = 100
+REGULAR_UPLOAD_FREQ = 5
 
 # Global variables
 Connected = False
@@ -183,17 +183,17 @@ try:
 					filename = "{0}/{1}X_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
 					data = {'max': Sensors_processed_data[sensor]['ax_max'], 'min': Sensors_processed_data[sensor]['ax_min']}
-					f.write(json.dumps(Sensors_processed_data[sensor]))
+					f.write(json.dumps(data))
 					f.close()
 					filename = "{0}/{1}Y_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
 					data = {'max': Sensors_processed_data[sensor]['ay_max'], 'min': Sensors_processed_data[sensor]['ay_min']}
-					f.write(json.dumps(Sensors_processed_data[sensor]))
+					f.write(json.dumps(data))
 					f.close()
 					filename = "{0}/{1}Z_{2}.dat".format(DIR_PRC,sensor,Latest_sensing_time)
 					f= open(filename,"w+")
 					data = {'max': Sensors_processed_data[sensor]['az_max'], 'min': Sensors_processed_data[sensor]['az_min']}
-					f.write(json.dumps(Sensors_processed_data[sensor]))
+					f.write(json.dumps(data))
 					f.close()
 				Status = STATUS_LIST[3]
 
