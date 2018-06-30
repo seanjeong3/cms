@@ -96,6 +96,8 @@ class Data_handler:
 		filelist = self.Check_data_dir()
 		for f in filelist:
 			data = self.Parse_data_file(f)
+			if data == None:
+				return False
 			success = self.Transmit_data(data)
 			if success:
 				self.Archive_data(f)
@@ -159,11 +161,9 @@ class Raw_data_handler(Data_handler):
 	def Parse_data_file(self,f):
 		# Open file (Currently very simple since the file already formatted based on JSON)
 		try:
-			# Mapping into JSON format
+			# Mapping into JSON format	
 			with open(f, 'rb') as fs:
-				data = np.genfromtxt(fs)
-				data = data.tolist()
-
+				data = json.load(fs)
 			bname = os.path.basename(f)
 			sensor_id = bname.split('_')[0]
 			timestamp = datetime.datetime.strptime(bname.split('_')[1][:-4], '%Y-%m-%d %H:%M:%S.%f')
